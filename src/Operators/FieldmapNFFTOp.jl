@@ -35,7 +35,7 @@ end
 
 """
     FieldmapNFFTOp(shape::NTuple{D,Int64}, tr::Trajectory,
-                        correctionmap::Array{ComplexF64,D};
+                        correctionmap::Array{Complex{T},D};
                         method::String="nfft",
                         echoImage::Bool=true,
                         alpha::Float64=1.75,
@@ -49,7 +49,7 @@ including B0-inhomogeneities using time-segmented NFFTs.
 # Arguments:
 * `shape::NTuple{D,Int64}`             - size of image to encode/reconstruct
 * `tr::Trajectory`                     - Trajectory with the kspace nodes to sample
-* `correctionmap::Array{ComplexF64,D}` - fieldmap for the correction of off-resonance effects
+* `correctionmap::Array{Complex{T},D}` - fieldmap for the correction of off-resonance effects
 * (`method::String="nfft"`)            - method to use for time-segmentation when correctio field inhomogeneities
 * (`echoImage::Bool=false`)            - if true sampling times will only be considered relative to the echo time
                                          this results in complex valued image even for real-valued input.
@@ -90,7 +90,7 @@ function FieldmapNFFTOp(shape::NTuple{D,Int64}, tr::Trajectory,
     plans[κ] = plan_nfft(nodes[:,idx[κ]], shape, m=3, σ=1.25, precompute = NFFT.FULL)
   end
 
-  d = [zeros(ComplexF64, length(idx[κ])) for κ=1:K ]
+  d = [zeros(Complex{T}, length(idx[κ])) for κ=1:K ]
   
   circTraj = isCircular(tr)
 
@@ -102,7 +102,7 @@ function FieldmapNFFTOp(shape::NTuple{D,Int64}, tr::Trajectory,
   return FieldmapNFFTOp{T,Nothing,Function,D}(nrow, ncol, false, false
             , mul!
             , nothing
-            , ctmul!, 0, 0, 0, false, false, false, ComplexF64[], ComplexF64[]
+            , ctmul!, 0, 0, 0, false, false, false, Complex{T}[], Complex{T}[]
             , plans, idx, circTraj, shape, cparam)
 end
 
@@ -175,7 +175,7 @@ function produ_inner(K, C, A, shape, d, s, sp, plan, idx, x_)
 end
 
 
-# function ctprodu{T<:ComplexF64}(x::Vector{T}, shape::Tuple, plan::Vector{NFFTPlan{Float64,2,1}, cparam::InhomogeneityData, density::Vector{Float64}, symmetrize::Bool)
+# function ctprodu{T<:Complex{T}}(x::Vector{T}, shape::Tuple, plan::Vector{NFFTPlan{Float64,2,1}, cparam::InhomogeneityData, density::Vector{Float64}, symmetrize::Bool)
 function ctprodu(x::Vector{Complex{T}}, shape::Tuple, plan, idx::Vector{Vector{Int64}},
                  cparam::InhomogeneityData{T}, shutter::Bool, d) where T
 
@@ -203,14 +203,14 @@ function ctprodu(x::Vector{Complex{T}}, shape::Tuple, plan, idx::Vector{Vector{I
   return y
 end
 
-function ctprodu_inner(K, C, A, shape, d, y, sp, plan, idx, x_)
+function ctprodu_inner(K, C::Matrix{Complex{T}}, A::Matrix{Complex{T}}, shape, d, y, sp, plan, idx, x_) where T
 
   @sync for κ=1:K
     Threads.@spawn begin
        for k=1:length(idx[κ])
          d[κ][k] = conj.(A[idx[κ][k],κ]) * x_[idx[κ][k]]
        end
-       p_ = zeros(ComplexF64, shape) 
+       p_ = zeros(Complex{T}, shape) 
      
        mul!(p_, adjoint(plan[κ]), d[κ])
      
