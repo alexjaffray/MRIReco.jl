@@ -176,7 +176,7 @@ function Base.:*(S::DiagNormalOp, x::AbstractVector{T}) where T
   return S.y
 end
 
-function _produ_diagnormalop(ops, idx, x, y)
+function _produ_diagnormalop(ops, idx, x::AbstractVector{T}, y::AbstractVector{T}) where T
   @sync for i=1:length(ops)
     Threads.@spawn begin
        y[idx[i]:idx[i+1]-1] = ops[i]*x[idx[i]:idx[i+1]-1]

@@ -263,6 +263,45 @@ function testOffresonanceSENSEReco(N = 64)
   @test (norm(vec(I)-vec(Ireco))/norm(vec(I))) < 1.6e-1
 end
 
+
+function testOffresonanceSENSEReco(N = 64, T = ComplexF64)
+  numCoils = 8
+  I = T.(shepp_logan(N))
+  I = circularShutterFreq!(I,1)
+
+  coilsens = T.(birdcageSensitivity(N, 8, 1.5))
+  cmap = T.(1im*quadraticFieldmap(N,N,125*2pi))
+
+  # simulation parameters
+  params = Dict{Symbol, Any}()
+  params[:simulation] = "fast"
+  params[:trajName] = "Spiral"
+  params[:numProfiles] = 1
+  params[:numSamplingPerProfile] = div(N*N,2)
+  params[:windings] = div(N,4)
+  params[:AQ] = 3.0e-2
+  params[:senseMaps] = coilsens
+  params[:correctionMap] = cmap[:,:,1]
+
+  # do simulation
+  acqData = simulation(I, params)
+
+  # reco parameters
+  params = Dict{Symbol, Any}()
+  params[:reco] = "multiCoil" #"standard"
+  params[:reconSize] = (N,N)
+  params[:regularization] = "L2"
+  params[:iterations] = 3
+  params[:solver] = "cgnr"
+  params[:solverInfo] = SolverInfo(T)
+  params[:senseMaps] = coilsens
+  params[:correctionMap] = cmap
+
+  Ireco = reconstruction(acqData, params)
+
+  @test (norm(vec(I)-vec(Ireco))/norm(vec(I))) < 1.6e-1
+end
+
 function testDirectRecoMultiEcho(N=32)
   # image
   x = ComplexF64.(shepp_logan(N))
@@ -426,9 +465,10 @@ function testReco(N=32)
     for a in accelMethods
       !Sys.iswindows() && testOffresonanceReco(accelMethod=a)
     end
-    testSENSEReco(64, ComplexF32)
-    testSENSEReco(64, ComplexF64)
-    !Sys.iswindows() && testOffresonanceSENSEReco()
+    testSENSEReco(N, ComplexF32)
+    testSENSEReco(N, ComplexF64)
+    !Sys.iswindows() && testOffresonanceSENSEReco(N, ComplexF32)
+    !Sys.iswindows() && testOffresonanceSENSEReco(N, ComplexF64)
     testDirectRecoMultiEcho()
     testRegridding() 
   end
