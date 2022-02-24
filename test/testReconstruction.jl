@@ -450,26 +450,46 @@ end
 
 function testReco(N=32)
   @testset "Reconstructions" begin
+
+    @info "Testing 2D Gridding Reco"
     testGriddingReco()
+    @info "Testing 3D Gridding Reco"
     testGriddingReco3d()
     sampling = ["random", "poisson", "vdPoisson"] # "lines"
+
+    @info "Testing Compressed Sensing Recons with Sampling Patterns"
     for samp in sampling
       testCSReco(sampling=samp)
     end
+
+    @info "Testing MultiCoil CS Recons with F64"
     testCSRecoMultCoil(type = ComplexF64)
+    @info "Testing MultiCoil CS Recons with F32"
     testCSRecoMultCoil(type = ComplexF32)
+    @info "Testing CS Recons with SENSE"
     testCSSenseReco()
-    testCSReco3d()
     testCSSenseReco3d()
+
+    @info "Testing 3D CS Recon"
+    testCSReco3d()
+
+    @info "Testing Off-Resonance Aware Recon"
     accelMethods = ["nfft", "hist", "leastsquare"]
     for a in accelMethods
       !Sys.iswindows() && testOffresonanceReco(accelMethod=a)
     end
+
+    @info "Testing SENSE Reconstructions"
     testSENSEReco(N, ComplexF32)
     testSENSEReco(N, ComplexF64)
+    @info "Testing Off-Resonance SENSE Reconstructions"
     !Sys.iswindows() && testOffresonanceSENSEReco(N, ComplexF32)
     !Sys.iswindows() && testOffresonanceSENSEReco(N, ComplexF64)
+
+    @info "Testing Direct MultiEcho Recon"
     testDirectRecoMultiEcho()
+
+    @info "Testing Regridding"
     testRegridding() 
   end
 end
