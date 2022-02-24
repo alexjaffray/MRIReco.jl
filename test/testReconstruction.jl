@@ -269,7 +269,7 @@ function testOffresonanceSENSEReco(N = 64, T = ComplexF64)
   I = T.(shepp_logan(N))
   I = circularShutterFreq!(I,1)
 
-  coilsens = T.(birdcageSensitivity(N, 8, 1.5))
+  coilsens = T.(birdcageSensitivity(N, numCoils, 1.5))
   cmap = T.(1im*quadraticFieldmap(N,N,125*2pi))
 
   # simulation parameters
@@ -291,7 +291,7 @@ function testOffresonanceSENSEReco(N = 64, T = ComplexF64)
   params[:reco] = "multiCoil" #"standard"
   params[:reconSize] = (N,N)
   params[:regularization] = "L2"
-  params[:iterations] = 3
+  params[:iterations] = 10
   params[:solver] = "cgnr"
   params[:solverInfo] = SolverInfo(T)
   params[:senseMaps] = coilsens
@@ -479,11 +479,13 @@ function testReco(N=32)
       !Sys.iswindows() && testOffresonanceReco(accelMethod=a)
     end
 
-    @info "Testing SENSE Reconstructions"
+    @info "Testing SENSE Reconstructions (32-bit)"
     testSENSEReco(N, ComplexF32)
+    @info "Testing SENSE Reconstructions (64-bit)"
     testSENSEReco(N, ComplexF64)
-    @info "Testing Off-Resonance SENSE Reconstructions"
+    @info "Testing Off-Resonance SENSE Reconstructions (32-bit)"
     !Sys.iswindows() && testOffresonanceSENSEReco(N, ComplexF32)
+    @info "Testing Off-Resonance SENSE Reconstructions (64-bit)"
     !Sys.iswindows() && testOffresonanceSENSEReco(N, ComplexF64)
 
     @info "Testing Direct MultiEcho Recon"
