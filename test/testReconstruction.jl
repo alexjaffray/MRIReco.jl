@@ -265,9 +265,9 @@ end
 
 
 function testOffresonanceSENSEReco(N = 64, T = ComplexF64)
-  numCoils = 8
-  I = T.(shepp_logan(N))
-  I = circularShutterFreq!(I,1)
+  numCoils = 32
+  ISim = T.(shepp_logan(N))
+  ISim = circularShutterFreq!(ISim,1)
 
   coilsens = T.(birdcageSensitivity(N, numCoils, 1.5))
   cmap = T.(1im*quadraticFieldmap(N,N,125*2pi))
@@ -284,22 +284,22 @@ function testOffresonanceSENSEReco(N = 64, T = ComplexF64)
   params[:correctionMap] = cmap[:,:,1]
 
   # do simulation
-  acqData = simulation(I, params)
+  acqData = simulation(ISim, params)
 
   # reco parameters
   params = Dict{Symbol, Any}()
   params[:reco] = "multiCoil" #"standard"
   params[:reconSize] = (N,N)
   params[:regularization] = "L2"
-  params[:iterations] = 10
+  params[:iterations] = 20
   params[:solver] = "cgnr"
   params[:solverInfo] = SolverInfo(T)
   params[:senseMaps] = coilsens
-  params[:correctionMap] = cmap
+  params[:correctionMap] = cmap[:,:,1]
 
   Ireco = reconstruction(acqData, params)
 
-  @test (norm(vec(I)-vec(Ireco))/norm(vec(I))) < 1.6e-1
+  @test (norm(vec(ISim)-vec(Ireco))/norm(vec(ISim))) < 3.0e-1
 end
 
 function testDirectRecoMultiEcho(N=32)
