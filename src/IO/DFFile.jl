@@ -1,3 +1,4 @@
+export trajectory
 
 export DFFile
 
@@ -8,7 +9,7 @@ end
 
 # reading
 
-function MRIBase.trajectory(f::DFFile; kargs...)
+function trajectory(f::DFFile; kargs...)
   numSamplingPerProfile, numProfiles, nodes = open(f.trajfilename,"r") do fd
     tmp1, numSamplingPerProfile, numProfiles, tmp2 = Int64.(read!(fd,Array{Int32}(undef,4)))
     nodes = read!(fd, Array{Float32}(undef, 2, numSamplingPerProfile,numProfiles))
