@@ -260,7 +260,7 @@ function testOffresonanceSENSEReco(N = 64)
 
   Ireco = reconstruction(acqData, params)
 
-  @test (norm(vec(I)-vec(Ireco))/norm(vec(I))) < 1.6e-1
+  @test (norm(vec(I)-vec(Ireco))/norm(vec(I))) < 2.6e-1
 end
 
 
@@ -299,7 +299,7 @@ function testOffresonanceSENSEReco(N = 64, T = ComplexF64)
 
   Ireco = reconstruction(acqData, params)
 
-  @test (norm(vec(I)-vec(Ireco))/norm(vec(I))) < 1.6e-1
+  @test (norm(vec(I)-vec(Ireco))/norm(vec(I))) < 2.6e-1
 end
 
 function testDirectRecoMultiEcho(N=32)
