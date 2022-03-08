@@ -203,27 +203,44 @@ function GeneralParameters(xdoc::XMLDocument)
       addToDict!(params, e[1], "echo_spacing", Float64)
     end
 
-    # waveformInformation
-    e = get_elements_by_tagname(LightXML.root(xdoc),"waveformInformation")
-    if !isempty(e)
-      addToDict!(params, e[1], "waveformName", Float64)
-      addToDict!(params, e[1], "waveformType", Float64)
+  # TODO: implement as in ismrmrd header specification, see https://ismrmrd.github.io/apidocs/1.4.2/xml_8h_source.html
+  #   enum class WaveformType {
+  #     ECG,
+  #     PULSE,
+  #     RESPIRATORY,
+  #     TRIGGER,
+  #     GRADIENTWAVEFORM,
+  #     OTHER
+  # };
 
-      if !isempty(e[1]["userParameters"])
-          d = e[1]["userParameters"]
-          y = Dict{String,Any}()
-          for q in d["userParameterLong"]
-            y[content(q["name"][1])] = parse(Int,content(q["value"][1]))
-          end
-          for q in d["userParameterDouble"]
-            y[content(q["name"][1])] = parse(Float64,content(q["value"][1]))
-          end
-          for q in d["userParameterString"]
-            y[content(q["name"][1])] = content(q["value"][1])
-          end
-          params["waveformUserParameters"] = y
-      end
-    end
+
+  # struct WaveformInformation{
+  #     std::string waveformName;
+  #     WaveformType waveformType;
+  #     Optional<UserParameters> userParameters;
+  # };
+
+    # # waveformInformation
+    # e = get_elements_by_tagname(LightXML.root(xdoc),"waveformInformation")
+    # if !isempty(e)
+    #   addToDict!(params, e[1], "waveformName", String)
+    #   addToDict!(params, e[1], "waveformType", String)
+
+    #   if !isempty(e[1]["userParameters"])
+    #       d = e[1]["userParameters"]
+    #       y = Dict{String,Any}()
+    #       for q in d["userParameterLong"]
+    #         y[content(q["name"][1])] = parse(Int,content(q["value"][1]))
+    #       end
+    #       for q in d["userParameterDouble"]
+    #         y[content(q["name"][1])] = parse(Float64,content(q["value"][1]))
+    #       end
+    #       for q in d["userParameterString"]
+    #         y[content(q["name"][1])] = content(q["value"][1])
+    #       end
+    #       params["waveformUserParameters"] = y
+    #   end
+    # end
 
     # UserParameters
     e = get_elements_by_tagname(LightXML.root(xdoc),"userParameters")
