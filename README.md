@@ -1,5 +1,7 @@
 # MRIReco
 
+Private Fork of MRIReco.jl which preserves functionality from before the package split. 
+
 ![Lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)<!--
 ![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)
 ![Lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)
